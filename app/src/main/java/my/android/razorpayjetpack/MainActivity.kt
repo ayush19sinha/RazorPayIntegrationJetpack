@@ -16,8 +16,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +37,7 @@ import org.json.JSONObject
 
 class MainActivity : ComponentActivity(), PaymentResultListener {
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -40,27 +45,27 @@ class MainActivity : ComponentActivity(), PaymentResultListener {
             RazorPayJetpackTheme {
                 val amountState = remember { mutableStateOf("") }
 
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(topBar = {
+                     TopAppBar(
+                         colors = topAppBarColors(
+                             containerColor = MaterialTheme.colorScheme.primaryContainer,
+                             titleContentColor = MaterialTheme.colorScheme.primary,
+                         ),
+                        title = { Text("Razorpay Jetpack Integration") }
+                    )
+                }
+                ) { innerPadding ->
                     Column(
                         modifier = Modifier
                             .padding(innerPadding)
                             .fillMaxSize()
                     ) {
-                        HeaderText()
                         AmountInputField(amountState)
                         PayButton(amountState)
                     }
                 }
             }
         }
-    }
-
-    @Composable
-    private fun HeaderText() {
-        Text(
-            text = "Razorpay Jetpack Integration",
-            modifier = Modifier.padding(16.dp)
-        )
     }
 
     @Composable

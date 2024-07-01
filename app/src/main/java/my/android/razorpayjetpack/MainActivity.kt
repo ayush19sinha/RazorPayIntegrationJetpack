@@ -18,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -38,75 +40,87 @@ class MainActivity : ComponentActivity(), PaymentResultListener {
             RazorPayJetpackTheme {
                 val amountState = remember { mutableStateOf("") }
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Column(
                         modifier = Modifier
                             .padding(innerPadding)
                             .fillMaxSize()
                     ) {
-                        Text(
-                            text = "Razorpay Jetpack Integration",
-                            modifier = Modifier.padding(16.dp)
-                        )
-
-                        BasicTextField(
-                            value = amountState.value,
-                            onValueChange = { amountState.value = it },
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Number
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                                .border(width = 1.dp, color = Color.Gray, shape = RoundedCornerShape(4.dp)),
-                            decorationBox = { innerTextField ->
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    if (amountState.value.isEmpty()) {
-                                        Text(
-                                            text = "Enter amount",
-                                            color = Color.Gray,
-                                            modifier = Modifier.padding(start = 4.dp)
-                                        )
-                                    }
-                                    innerTextField()
-                                }
-                            }
-                        )
-
-
-
-                        Button(
-                            onClick = {
-                                val amountText = amountState.value.trim()
-
-                                if (amountText.isEmpty()) {
-                                    Toast.makeText(this@MainActivity, "Please enter an amount", Toast.LENGTH_SHORT).show()
-                                    return@Button
-                                }
-
-                                val amount = amountText.toIntOrNull()
-                                if (amount == null || amount <= 0) {
-                                    Toast.makeText(this@MainActivity, "Please enter a valid amount", Toast.LENGTH_SHORT).show()
-                                    return@Button
-                                }
-
-                                startPayment(amount)
-                                amountState.value = ""
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-                            Text(text = "Pay", color = Color.White)
-                        }
+                        HeaderText()
+                        AmountInputField(amountState)
+                        PayButton(amountState)
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun HeaderText() {
+        Text(
+            text = "Razorpay Jetpack Integration",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+
+    @Composable
+    private fun AmountInputField(amountState: MutableState<String>) {
+        BasicTextField(
+            value = amountState.value,
+            onValueChange = { amountState.value = it },
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .border(1.dp, Color.Gray, RoundedCornerShape(4.dp)),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    if (amountState.value.isEmpty()) {
+                        Text(
+                            text = "Enter amount",
+                            color = Color.Gray,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
+                    }
+                    innerTextField()
+                }
+            }
+        )
+    }
+
+    @Composable
+    private fun PayButton(amountState: MutableState<String>) {
+        Button(
+            onClick = {
+                handlePaymentButtonClick(amountState)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(text = "Pay", color = Color.White)
+        }
+    }
+
+    private fun handlePaymentButtonClick(amountState: MutableState<String>) {
+        val amountText = amountState.value.trim()
+
+        when {
+            amountText.isEmpty() -> {
+                showToast("Please enter an amount")
+                return
+            }
+            amountText.toIntOrNull()?.let { it <= 0 } ?: true -> {
+                showToast("Please enter a valid amount")
+                return
+            }
+            else -> {
+                startPayment(amountText.toInt())
+                amountState.value = ""
             }
         }
     }
@@ -119,7 +133,7 @@ class MainActivity : ComponentActivity(), PaymentResultListener {
             val options = createPaymentOptions(amount)
             checkout.open(this, options)
         } catch (e: Exception) {
-            Toast.makeText(this, "Error in payment: ${e.message}", Toast.LENGTH_LONG).show()
+            showToast("Error in payment: ${e.message}")
             Log.e("MainActivity", "Error starting payment", e)
         }
     }
@@ -139,12 +153,16 @@ class MainActivity : ComponentActivity(), PaymentResultListener {
     }
 
     override fun onPaymentSuccess(razorpayPaymentId: String?) {
-        Toast.makeText(this, "Payment Successful", Toast.LENGTH_SHORT).show()
+        showToast("Payment Successful")
         Log.d("MainActivity", "Payment Successful: $razorpayPaymentId")
     }
 
     override fun onPaymentError(code: Int, response: String?) {
-        Toast.makeText(this, "Payment Not Successful", Toast.LENGTH_SHORT).show()
+        showToast("Payment Not Successful")
         Log.e("MainActivity", "Payment error $code: $response")
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 }

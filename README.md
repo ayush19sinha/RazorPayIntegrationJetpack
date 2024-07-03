@@ -10,7 +10,7 @@ Razorpay Jetpack Integration is an Android application demonstrating payment int
 
 ## Screenshots
 
-<img src = "https://github.com/ayush19sinha/RazorPayIntegrationJetpack/assets/143383811/9bb7e9f6-001f-48d9-b147-37fe34b0cdce" width = "180">
+<img src = "https://github.com/ayush19sinha/RazorPayIntegrationJetpack/assets/143383811/e109a1b9-a64d-4953-bda3-dd8983bb461b" width = "180">
 <img src = "https://github.com/ayush19sinha/RazorPayIntegrationJetpack/assets/143383811/76e2ca35-57ef-483f-b3fc-4373d4e582d5" width = "180">
 <img src = "https://github.com/ayush19sinha/RazorPayIntegrationJetpack/assets/143383811/ebb61163-ccc1-43ed-a4a0-23997e5526da" width = "180">
 
